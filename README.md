@@ -48,7 +48,7 @@ pip install -e .
 Run the pipeline by providing a folder containing video clips:
 
 ```bash
-python platelog.py input/
+platelog clips/
 ```
 
 By default, results are saved in the `results/` directory.
@@ -56,13 +56,13 @@ By default, results are saved in the `results/` directory.
 You can specify a different output directory using `--out`:
 
 ```bash
-python platelog.py input/ --out my_results/
+platelog clips/ --out my_results/
 ```
 
 For a list of available arguments:
 
 ```bash
-python platelog.py --help
+platelog --help
 ```
 
 ## Output
