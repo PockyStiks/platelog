@@ -38,10 +38,10 @@ conda create -n platelog python=3.10
 conda activate platelog
 ```
 
-Install dependencies:
+Install the project:
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ## Usage
