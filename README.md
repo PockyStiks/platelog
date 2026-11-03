@@ -1,4 +1,4 @@
-# Platelog CLI
+# platelog CLI
 
 A small Python demo that detects trucks in video footage and reads their license plates using YOLO and Fast-ALPR.
 
