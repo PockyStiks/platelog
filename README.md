@@ -89,3 +89,13 @@ results/
 Detection and recognition settings, such as confidence thresholds, frame sampling rate, and minimum agreeing OCR reads, can be adjusted in the settings section at the beginning of `platelog.py`.
 
 The ground truth used for evaluation is also defined in `platelog.py`.
+
+## Tests
+
+Tests are written using `pytest` and focus on the pipeline's decision-making logic, including plate recognition, conflicting OCR readings, truck tracking, and image selection.
+
+Run all tests from the project root:
+
+```bash
+pytest -v
+```
