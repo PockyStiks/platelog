@@ -18,15 +18,14 @@ cd platelog
 Create and activate a virtual environment:
 
 ```bash
-python -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
 ```
 
 Install dependencies:
 
 ```bash
-pip install --upgrade pip
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ### Option 2: Conda
@@ -34,7 +33,7 @@ pip install -r requirements.txt
 Create and activate a Conda environment:
 
 ```bash
-conda create -n platelog python=3.10
+conda create -n platelog python=3.13
 conda activate platelog
 ```
 
