@@ -1,6 +1,7 @@
 import argparse
 import json
 import cv2
+import time
 from datetime import timedelta, datetime, timezone
 from zoneinfo import ZoneInfo
 from pathlib import Path
@@ -178,7 +179,7 @@ def make_event(clip, number, truck, start, out_dir):
         "best_frame": str(frame_path.relative_to(out_dir))
     }
 
-def write_metrics(clips, events, out_dir):
+def write_metrics(clips, events, out_dir, execution_time):
     truck_tp = 0
     truck_fp = 0
     truck_fn = 0
@@ -257,9 +258,14 @@ def write_metrics(clips, events, out_dir):
     text += f"- Precision: {plate_precision:.2f}\n"
     text += f"- Recall: {plate_recall:.2f}\n"
 
+    text += f"\n## Execution Time\n"
+    text += f"- Total runtime: {execution_time:.2f} seconds\n"
+
     (out_dir / "RESULTS.md").write_text(text)
 
 def main():
+    start_time = time.perf_counter()
+
     parser = argparse.ArgumentParser(description="Read truck plates from video clips.")
     parser.add_argument("clips", type=Path, help="folder with video clips")
     parser.add_argument("--out", type=Path, default=Path("results"), help="output folder")
@@ -290,7 +296,9 @@ def main():
     (args.out / "events.json").write_text(json.dumps(events, indent=2))
     print(f"wrote {args.out / 'events.json'}")
 
-    write_metrics(clips, events, args.out)
+    execution_time = time.perf_counter() - start_time
+
+    write_metrics(clips, events, args.out, execution_time)
     print(f"wrote {args.out / 'RESULTS.md'}")
 
 if __name__ == "__main__":

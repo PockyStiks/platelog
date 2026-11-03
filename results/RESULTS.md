@@ -36,3 +36,6 @@
 - Correctly Identified Unreadable: 3
 - Precision: 1.00
 - Recall: 1.00
+
+## Execution Time
+- Total runtime: 20.14 seconds
