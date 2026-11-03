@@ -5,7 +5,6 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
-sys.path.append(".")
 import platelog
 
 
