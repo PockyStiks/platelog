@@ -1,0 +1,42 @@
+[
+  {
+    "clip": "IMG_5177.MOV",
+    "plate": "UNREADABLE",
+    "first_seen": "2026-10-26 13:24:06 ADT",
+    "last_seen": "2026-10-26 13:24:08 ADT",
+    "confidence": 0.0,
+    "best_frame": "frames/IMG_5177_truck1.jpg"
+  },
+  {
+    "clip": "IMG_5178.MOV",
+    "plate": "PUY052",
+    "first_seen": "2026-10-26 13:25:13 ADT",
+    "last_seen": "2026-10-26 13:25:18 ADT",
+    "confidence": 1.0,
+    "best_frame": "frames/IMG_5178_truck1.jpg"
+  },
+  {
+    "clip": "IMG_5179.MOV",
+    "plate": "PUY427",
+    "first_seen": "2026-10-26 17:00:23 ADT",
+    "last_seen": "2026-10-26 17:00:36 ADT",
+    "confidence": 1.0,
+    "best_frame": "frames/IMG_5179_truck1.jpg"
+  },
+  {
+    "clip": "IMG_5181.MOV",
+    "plate": "UNREADABLE",
+    "first_seen": "2026-10-27 11:55:48 ADT",
+    "last_seen": "2026-10-27 11:55:53 ADT",
+    "confidence": 0.0,
+    "best_frame": "frames/IMG_5181_truck1.jpg"
+  },
+  {
+    "clip": "IMG_5182.MOV",
+    "plate": "UNREADABLE",
+    "first_seen": "2026-10-27 11:57:03 ADT",
+    "last_seen": "2026-10-27 11:57:17 ADT",
+    "confidence": 0.0,
+    "best_frame": "frames/IMG_5182_truck1.jpg"
+  }
+]
