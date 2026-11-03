@@ -9,8 +9,8 @@ The pipeline tracks trucks across sampled video frames, collects license plate o
 Clone the repository:
 
 ```bash
-git clone <repository-url>
-cd <project-folder>
+git clone https://github.com/PockyStiks/platelog.git
+cd platelog
 ```
 
 ### Option 1: Python virtual environment (venv)
