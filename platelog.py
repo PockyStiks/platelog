@@ -21,8 +21,17 @@ MIN_SHARPNESS = 10 # blurrier crops are not worth reading
 MIN_AGREEING_READS = 3 # fewer agreeing reads -> UNREADABLE
 MIN_OCR_CONFIDENCE = 0.5 # lower confidence -> UNREADABLE
 SITE_TIMEZONE = "America/Moncton" # time zone to use for truck sightings
-TIME_FORMAT = "%Y-%m-%d %H:%M:%S %Z"
+TIME_FORMAT = "%Y-%m-%d %H:%M:%S %Z" # time format to use for truck sighting time 
 VIDEO_TYPES = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".3gp"}
+
+# Ground truth written by hand, many plates are unreadable to me due to low resolution/compression
+GROUND_TRUTH = {
+    "IMG_5177.MOV" : ["UNREADABLE"],
+    "IMG_5178.MOV" : ["PUY052"],
+    "IMG_5179.MOV" : ["PUY427"],
+    "IMG_5181.MOV" : ["UNREADABLE"],
+    "IMG_5182.MOV" : ["UNREADABLE"]
+}
 
 # Reads metadata and returns the start time of the clips
 def recording_start(path):
@@ -100,7 +109,7 @@ def read_clip(path, yolo, alpr):
 
                     truck = trucks.setdefault(track_id, {"obs": [], "image": None, "image_area": 0})
 
-                    # Keep the biggest view of the truck as its picture (for trucks without a readable plate)
+                    # Keep the biggest view of the truck as its picture for trucks without a readable plate
                     area = (x2 - x1) * (y2 - y1)
                     if area > truck["image_area"]:
                         truck["image"] = truck_crop.copy()
@@ -166,8 +175,89 @@ def make_event(clip, number, truck, start, out_dir):
         "first_seen": first_seen,
         "last_seen": last_seen,
         "confidence": round(confidence, 3),
-        "best_frame": str(frame_path.relative_to(out_dir)),
+        "best_frame": str(frame_path.relative_to(out_dir))
     }
+
+def write_metrics(clips, events, out_dir):
+    truck_tp = 0
+    truck_fp = 0
+    truck_fn = 0
+
+    plate_tp = 0
+    plate_fp = 0
+    plate_fn = 0
+    unreadable_correct = 0
+
+    results = []
+
+    for clip in clips:
+        truths = GROUND_TRUTH[clip.name]
+        detected = [event["plate"] for event in events if event["clip"] == clip.name]
+
+        results.append(f"{clip.name}: {' / '.join(detected) or 'NO EVENT'}")
+
+        # Evaluate truck detection
+        truck_tp += min(len(truths), len(detected))
+        truck_fp += max(0, len(detected) - len(truths))
+        truck_fn += max(0, len(truths) - len(detected))
+
+        # Evaluate plate recognition
+        for truth, plate in zip(truths, detected):
+            if truth == "UNREADABLE":
+                if plate == "UNREADABLE":
+                    unreadable_correct += 1
+                else:
+                    plate_fp += 1
+
+            elif plate == truth:
+                plate_tp += 1
+
+            else:
+                plate_fn += 1
+                if plate != "UNREADABLE":
+                    plate_fp += 1
+
+    # Calculate metrics
+    truck_precision = truck_tp / (truck_tp + truck_fp) if truck_tp + truck_fp else 0
+    truck_recall = truck_tp / (truck_tp + truck_fn) if truck_tp + truck_fn else 0
+
+    plate_precision = plate_tp / (plate_tp + plate_fp) if plate_tp + plate_fp else 0
+    plate_recall = plate_tp / (plate_tp + plate_fn) if plate_tp + plate_fn else 0
+
+    # Write results
+    text = "# Evaluation Results\n\n"
+
+    text += "## Ground Truth\n\n"
+    text += "| Clip | Expected Plates |\n"
+    text += "|---|---|\n"
+
+    for clip, plates in GROUND_TRUTH.items():
+        text += f"| {clip} | {', '.join(plates)} |\n"
+
+    text += "\n## Detected Plates\n\n"
+    text += "| Clip | Detected Plates |\n"
+    text += "|---|---|\n"
+
+    for result in results:
+        clip, plates = result.split(": ", 1)
+        text += f"| {clip} | {plates} |\n"
+
+    text += "\n## Truck Detection\n\n"
+    text += f"- True Positives: {truck_tp}\n"
+    text += f"- False Positives: {truck_fp}\n"
+    text += f"- False Negatives: {truck_fn}\n"
+    text += f"- Precision: {truck_precision:.2f}\n"
+    text += f"- Recall: {truck_recall:.2f}\n"
+
+    text += "\n## Plate Recognition\n\n"
+    text += f"- Correctly Read: {plate_tp}\n"
+    text += f"- Incorrectly Read: {plate_fp}\n"
+    text += f"- Not Read: {plate_fn}\n"
+    text += f"- Correctly Identified Unreadable: {unreadable_correct}\n"
+    text += f"- Precision: {plate_precision:.2f}\n"
+    text += f"- Recall: {plate_recall:.2f}\n"
+
+    (out_dir / "RESULTS.md").write_text(text)
 
 def main():
     parser = argparse.ArgumentParser(description="Read truck plates from video clips.")
@@ -199,6 +289,9 @@ def main():
 
     (args.out / "events.json").write_text(json.dumps(events, indent=2))
     print(f"wrote {args.out / 'events.json'}")
+
+    write_metrics(clips, events, args.out)
+    print(f"wrote {args.out / 'RESULTS.md'}")
 
 if __name__ == "__main__":
     main()
