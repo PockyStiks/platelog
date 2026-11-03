@@ -2,6 +2,7 @@
 
 ## Architecture
 
+```mermaid
 flowchart LR
     A["Input video clips"] --> B["Frame sampling (5 FPS)"]
     B --> C["YOLO truck detection and tracking"]
@@ -14,6 +15,7 @@ flowchart LR
     I --> J["events.json"]
     I --> K["Best representative images"]
     J --> L["RESULTS.md"]
+````
 
 ## Technology choices
 
