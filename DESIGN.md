@@ -19,54 +19,47 @@ flowchart LR
 
 ## Technology choices
 
-**Selected: Local YOLO + Fast-ALPR pipeline**
+**Selected: YOLO + Fast-ALPR**
 
-YOLO is used to detect and track trucks, while Fast-ALPR handles license plate detection and OCR. Multiple observations are combined using majority voting to improve recognition reliability.
+YOLO detects and tracks trucks, while Fast-ALPR detects and reads license plates. Majority voting across frames improves recognition reliability.
 
-This approach offers a good balance between accuracy, latency, and cost. Both frameworks can run locally using existing hardware, making the system suitable for rural sites with unreliable internet connectivity. There are no per-request API costs, and inference does not depend on an internet connection.
+Both run locally, with no API costs or internet dependency during inference.
 
 **Alternatives considered:**
 
-- **Vision-Language Model (VLM):** More flexible, but excessive for a relatively simple license plate recognition task. It introduces additional inference overhead, requires more powerful hardware, and may produce inconsistent or hallucinated readings.
-- **Cloud/API-based recognition:** Could provide access to managed models without maintaining local inference infrastructure. However, internet dependency, potential latency, and recurring API costs make it less suitable for a rural deployment.
+- **VLM:** More computationally expensive and potentially inconsistent for a simple OCR task.
+- **Cloud/API:** Introduces recurring costs, network dependency, and additional latency.
 
 ## Accuracy, cost and latency
 
-| Consideration | Design decision |
+| Consideration | Approach |
 |---|---|
-| Accuracy | Multiple frame observations, majority voting, and confidence thresholds reduce incorrect readings. |
-| Cost per truck | No API fees; costs are primarily hardware, electricity, and maintenance. |
-| Latency | Sampling at 5 FPS reduces computation, but clips are currently processed sequentially rather than in real time. |
-| Offline operation | Models run locally, requiring no internet connection during inference. |
+| Accuracy | Multi-frame voting and confidence thresholds. |
+| Cost | No API fees; hardware and electricity costs only. |
+| Latency | 5 FPS sampling; clips processed sequentially. |
+| Offline | Fully local inference. |
 
-## Scaling to a 24/7 scale-house deployment
+## Scaling to a 24/7 deployment
 
-The current implementation is designed for prerecorded phone clips. For a fixed camera installation, I would keep YOLO tracking, Fast-ALPR, frame sampling, and multi-frame plate aggregation.
-
-The main changes would be:
-
-- Replace video-file input with a continuous camera stream.
-- Process frames continuously and finalize an event when a truck leaves the camera's field of view.
-- Add persistent event storage (e.g. SQLite) instead of relying exclusively on JSON files.
-- Add automatic cleanup and log rotation to prevent storage exhaustion.
-- Implement camera health monitoring, automatic recovery, and error handling.
-- Use reliable camera timestamps and local time synchronization.
-
-## Limitations and future work
+For a fixed scale-house camera:
+- Replace video input with a continuous camera stream.
+- Finalize events when trucks leave the camera view.
+- Use persistent storage (SQLite) instead of JSON.
+- Add camera monitoring, automatic recovery, and storage cleanup.
 
 **What breaks at 10x the data?**
 
-Processing time and storage requirements would increase. Sequential clip processing could create a backlog, while retaining every frame and generated image indefinitely would consume significant disk space. I would introduce asynchronous processing, bounded queues, and retention policies.
+Sequential processing could create backlogs, while storing every frame would increase disk usage. Asynchronous processing, bounded queues, and retention policies would address this.
 
-**What I would do with two additional days:**
+## Future work
 
-- Experiment with image preprocessing techniques such as contrast enhancement, denoising, resizing, and perspective correction.
-- Benchmark alternative YOLO and ALPR models to compare recognition accuracy and inference speed.
-- Improve error handling, logging, and recovery from failed video reads or model errors.
-- Evaluate performance on additional video samples and more varied lighting conditions.
+With two additional days, I would:
+- Test image preprocessing techniques.
+- Benchmark alternative YOLO and ALPR models.
+- Improve error handling and logging.
+- Test under different lighting conditions.
 
 ## Project execution
 
 - **Time spent:** Approximately 10 hours.
-- **What changed:** The initial implementation used Fast-ALPR alone. It was replaced with a YOLO + Fast-ALPR pipeline to include truck detection and tracking, as required by the project.
-- **What was cut:** Testing with other models and preprocessing steps, which could potentially lead to better results.
+- **What was cut:** Testing with alternative models and image preprocessing techniques.
